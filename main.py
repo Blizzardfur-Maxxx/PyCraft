@@ -1,3 +1,4 @@
+
 import math
 import ctypes
 import pyglet
@@ -11,77 +12,81 @@ import matrix
 import shader
 import camera
 
-import block_type
-import texture_manager
-
-import chunks
+import world
 
 class Window(pyglet.window.Window):
 	def __init__(self, **args):
-		
 		super().__init__(**args)
 
-		self.texture_manager = texture_manager.Texture_manager(16, 16, 256)
-		self.cobblestone = block_type.Block_type(self.texture_manager, "cobblestone", {"all": "cobblestone"})
-		self.grass = block_type.Block_type(self.texture_manager, "grass", {"top": "grass", "bottom": "dirt", "sides": "grass_side"})
-		self.dirt = block_type.Block_type(self.texture_manager, "dirt", {"all": "dirt"})
-		self.stone = block_type.Block_type(self.texture_manager, "stone", {"all": "stone"})
-		self.sand = block_type.Block_type(self.texture_manager, "sand", {"all": "sand"})
-		self.planks = block_type.Block_type(self.texture_manager, "planks", {"all": "planks"})
-		self.log = block_type.Block_type(self.texture_manager, "log", {"top": "log_top", "bottom": "log_top", "sides": "log_side"})
+		# create world
 
-		self.chunks = {}
-		self.chunks[(0, 0, 0)] = chunks.Chunks((0, 0, 0))
-		self.chunks[(0, 0, 0)].update_mesh(self.cobblestone)
+		self.world = world.World()
+		
+		# create shader
 
 		self.shader = shader.Shader("vert.glsl", "frag.glsl")
 		self.shader_sampler_location = self.shader.find_uniform(b"texture_array_sampler")
 		self.shader.use()
 
-		pyglet.clock.schedule_interval(self.update, 1.0 / 60)
-		self.mouse_captured = False
-		
+		# pyglet stuff
 
-		self.camera =camera.Camera(self.shader, self.width, self.height)
-			
+		pyglet.clock.schedule_interval(self.update, 1.0 / 10000) # set the update interval as small as possible
+		self.mouse_captured = False
+
+		# camera stuff
+
+		self.camera = camera.Camera(self.shader, self.width, self.height)
+	
 	def update(self, delta_time):
-		print(f"FPS: {1.0/delta_time}")
+		print(f"FPS {1 / delta_time}") # print out the current FPS
+
 		if not self.mouse_captured:
 			self.camera.input = [0, 0, 0]
+
 		self.camera.update_camera(delta_time)
-		
 	
 	def on_draw(self):
 		self.camera.update_matrices()
-		
+
+		# bind textures
+
 		gl.glActiveTexture(gl.GL_TEXTURE0)
-		gl.glBindTexture(gl.GL_TEXTURE_2D_ARRAY, self.texture_manager.texture_array)
+		gl.glBindTexture(gl.GL_TEXTURE_2D_ARRAY, self.world.texture_manager.texture_array)
 		gl.glUniform1i(self.shader_sampler_location, 0)
 
+		# draw stuff
+
 		gl.glEnable(gl.GL_DEPTH_TEST)
+		gl.glEnable(gl.GL_CULL_FACE)
+
 		gl.glClearColor(0.0, 0.0, 0.0, 1.0)
 		self.clear()
+		self.world.draw()
 
-		for chunk_position in self.chunks:
-			self.chunks[chunk_position].draw()
+		gl.glFinish() # there seems to be a bit of a bug in Pyglet which makes this call necessary
 	
+	# input functions
+
 	def on_resize(self, width, height):
 		print(f"Resize {width} * {height}")
 		gl.glViewport(0, 0, width, height)
+
 		self.camera.width = width
 		self.camera.height = height
-		
+	
 	def on_mouse_press(self, x, y, button, modifiers):
 		self.mouse_captured = not self.mouse_captured
 		self.set_exclusive_mouse(self.mouse_captured)
-		
-	def on_mouse_motion(self, x, y, delta_x, delta_y ):
+	
+	def on_mouse_motion(self, x, y, delta_x, delta_y):
 		if self.mouse_captured:
 			sensitivity = 0.004
+
 			self.camera.rotation[0] -= delta_x * sensitivity
-			self.camera.rotation[1] -= delta_y * sensitivity
+			self.camera.rotation[1] += delta_y * sensitivity
+
 			self.camera.rotation[1] = max(-math.tau / 4, min(math.tau / 4, self.camera.rotation[1]))
-			
+	
 	def on_key_press(self, key, modifiers):
 		if not self.mouse_captured:
 			return
@@ -108,7 +113,7 @@ class Window(pyglet.window.Window):
 
 class Game:
 	def __init__(self):
-		self.config = gl.Config(double_buffer = True, major_version = 3, minor_version = 3, depth_size = 16)
+		self.config = gl.Config(double_buffer = True, major_version = 3, minor_version = 3, depth_size = 16) # add depth_size = 16 because pyglet makes a 24 bit depth buffer by default, which isn't supported on some hardware
 		self.window = Window(config = self.config, width = 800, height = 600, caption = "Minecraft clone", resizable = True, vsync = False)
 	
 	def run(self):

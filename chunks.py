@@ -4,16 +4,23 @@ import pyglet.gl as gl
 
 CHUNK_WIDTH = 16
 CHUNK_HEIGHT = 16
-CHUNK_LENGHT = 16
+CHUNK_LENGTH = 16
 
 class Chunk:
-    def __init__(self, chunk_position):
+    def __init__(self, world, chunk_position):
         self.chunk_position = chunk_position
 
         self.position = (
             self.chunk_position[0] * CHUNK_WIDTH,
             self.chunk_position[1] * CHUNK_HEIGHT,
-            self.chunk_position[2] * CHUNK_LENGHT)
+            self.chunk_position[2] * CHUNK_LENGTH)
+        
+        self.world = world
+
+        self.blocks = [[[0 # create an array of blocks filled with "air" (block number 0)
+			for z in range(CHUNK_LENGTH)]
+			for y in range(CHUNK_HEIGHT)]
+			for x in range(CHUNK_WIDTH )]
         
         self.has_mesh = False
 
@@ -52,7 +59,12 @@ class Chunk:
 
         for local_x in range(CHUNK_WIDTH):
             for local_y in range(CHUNK_HEIGHT):
-                for local_z in range(CHUNK_LENGHT):
+                for local_z in range(CHUNK_LENGTH):
+                    block_number = self.blocks[local_x][local_y][local_z] # get the block number of the block at that local position
+                    
+                    if block_number: # check if the block is not air
+                        block_type = self.world.block_types[block_number] # get the block type
+                    
                     x, y, z = (
                         self.position[0] + local_x,
                         self.position[1] + local_y,
@@ -99,7 +111,7 @@ class Chunk:
 			(gl.GLfloat * len(self.mesh_tex_cords)) (*self.mesh_tex_cords),
 			gl.GL_STATIC_DRAW)
                 
-        gl.glVertexAttribPointer(0, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
+        gl.glVertexAttribPointer(1, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
         gl.glEnableVertexAttribArray(1)
 
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.shading_values_vbo)
@@ -109,7 +121,7 @@ class Chunk:
 			(gl.GLfloat * len(self.mesh_shading_values)) (*self.mesh_shading_values),
 			gl.GL_STATIC_DRAW)
                 
-        gl.glVertexAttribPointer(0, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
+        gl.glVertexAttribPointer(2, 1, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
         gl.glEnableVertexAttribArray(2)
 
 
@@ -123,6 +135,8 @@ class Chunk:
     def draw(self):
         if not self.mesh_index_counter:
             return
+        gl.glBindVertexArray(self.vao)
+        
         gl.glDrawElements(
 			gl.GL_TRIANGLES,
 			len(self.mesh_indices),
