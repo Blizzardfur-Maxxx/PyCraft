@@ -15,6 +15,8 @@ import camera
 import block_type
 import texture_manager
 
+import chunks
+
 class Window(pyglet.window.Window):
 	def __init__(self, **args):
 		
@@ -94,7 +96,7 @@ class Window(pyglet.window.Window):
 		self.camera =camera.Camera(self.shader, self.width, self.height)
 			
 	def update(self, delta_time):
-		self.camera.update_camera(delta_time)
+		print(f"FPS: {1.0/delta_time}")
 		if not self.mouse_captured:
 			self.camera.input = [0, 0, 0]
 		self.camera.update_camera(delta_time)
