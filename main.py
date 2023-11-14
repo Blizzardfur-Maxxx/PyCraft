@@ -1,4 +1,3 @@
-
 import math
 import ctypes
 import pyglet
@@ -31,59 +30,9 @@ class Window(pyglet.window.Window):
 		self.planks = block_type.Block_type(self.texture_manager, "planks", {"all": "planks"})
 		self.log = block_type.Block_type(self.texture_manager, "log", {"top": "log_top", "bottom": "log_top", "sides": "log_side"})
 
-		self.texture_manager.generate_mipmaps()
-		self.vao = gl.GLuint(0)
-		gl.glGenVertexArrays(1, ctypes.byref(self.vao))
-		gl.glBindVertexArray(self.vao)
-
-		self.vertex_position_vbo = gl.GLuint(0)
-		gl.glGenBuffers(1, ctypes.byref(self.vertex_position_vbo))
-		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vertex_position_vbo)
-
-		gl.glBufferData(
-			gl.GL_ARRAY_BUFFER,
-			ctypes.sizeof(gl.GLfloat * len(self.grass.vertex_positions)),
-			(gl.GLfloat * len(self.grass.vertex_positions)) (*self.grass.vertex_positions),
-			gl.GL_STATIC_DRAW)
-		
-		gl.glVertexAttribPointer(0, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
-		gl.glEnableVertexAttribArray(0)
-
-		self.tex_coord_vbo = gl.GLuint(0)
-		gl.glGenBuffers(1, ctypes.byref(self.tex_coord_vbo))
-		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.tex_coord_vbo)
-
-		gl.glBufferData(
-			gl.GL_ARRAY_BUFFER,
-			ctypes.sizeof(gl.GLfloat * len(self.grass.tex_coords)),
-			(gl.GLfloat * len(self.grass.tex_coords)) (*self.grass.tex_coords),
-			gl.GL_STATIC_DRAW)
-		
-		gl.glVertexAttribPointer(1, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
-		gl.glEnableVertexAttribArray(1)
-
-		self.shading_value_vbo = gl.GLuint(0)
-		gl.glGenBuffers(1, ctypes.byref(self.shading_value_vbo))
-		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.shading_value_vbo)
-
-		gl.glBufferData(
-			gl.GL_ARRAY_BUFFER,
-			ctypes.sizeof(gl.GLfloat * len(self.grass.shading_values)),
-			(gl.GLfloat * len(self.grass.shading_values)) (*self.grass.shading_values),
-			gl.GL_STATIC_DRAW)
-		
-		gl.glVertexAttribPointer(2, 1, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
-		gl.glEnableVertexAttribArray(2)
-
-		self.ibo = gl.GLuint(0)
-		gl.glGenBuffers(1, self.ibo)
-		gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, self.ibo)
-
-		gl.glBufferData(
-			gl.GL_ELEMENT_ARRAY_BUFFER,
-			ctypes.sizeof(gl.GLuint * len(self.grass.indices)),
-			(gl.GLuint * len(self.grass.indices)) (*self.grass.indices),
-			gl.GL_STATIC_DRAW)
+		self.chunks = {}
+		self.chunks[(0, 0, 0)] = chunks.Chunks((0, 0, 0))
+		self.chunks[(0, 0, 0)].update_mesh(self.cobblestone)
 
 		self.shader = shader.Shader("vert.glsl", "frag.glsl")
 		self.shader_sampler_location = self.shader.find_uniform(b"texture_array_sampler")
@@ -113,11 +62,8 @@ class Window(pyglet.window.Window):
 		gl.glClearColor(0.0, 0.0, 0.0, 1.0)
 		self.clear()
 
-		gl.glDrawElements(
-			gl.GL_TRIANGLES,
-			len(self.grass.indices),
-			gl.GL_UNSIGNED_INT,
-			None)
+		for chunk_position in self.chunks:
+			self.chunks[chunk_position].draw()
 	
 	def on_resize(self, width, height):
 		print(f"Resize {width} * {height}")
