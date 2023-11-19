@@ -30,7 +30,7 @@ class Window(pyglet.window.Window):
 
 		self.camera = camera.Camera(self.shader, self.width, self.height)
 
-		self.holding = 7
+		self.holding = 1
 	
 	def update(self, delta_time):
 		print(f"FPS: {1.0 / delta_time}")
@@ -50,7 +50,7 @@ class Window(pyglet.window.Window):
 		gl.glEnable(gl.GL_DEPTH_TEST)
 		gl.glEnable(gl.GL_CULL_FACE)
 
-		gl.glClearColor(0.0, 0.0, 0.0, 1.0)
+		gl.glClearColor(0.0, 0.0, 0.7, 0.5)
 		self.clear()
 		self.world.draw()
 
@@ -88,7 +88,7 @@ class Window(pyglet.window.Window):
 			sensitivity = 0.004
 
 			self.camera.rotation[0] += delta_x * sensitivity
-			self.camera.rotation[1] -= delta_y * sensitivity
+			self.camera.rotation[1] += delta_y * sensitivity
 
 			self.camera.rotation[1] = max(-math.tau / 4, min(math.tau / 4, self.camera.rotation[1]))
 
@@ -106,6 +106,12 @@ class Window(pyglet.window.Window):
 
 		elif key == pyglet.window.key.SPACE : self.camera.input[1] += 1
 		elif key == pyglet.window.key.LSHIFT: self.camera.input[1] -= 1
+
+	def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
+		if scroll_y > 0:
+			self.holding += 1
+		else:
+			self.holding -= 1		
 	
 	def on_key_release(self, key, modifiers):
 		if not self.mouse_captured:
@@ -121,7 +127,7 @@ class Window(pyglet.window.Window):
 
 		elif key == pyglet.window.key.ESCAPE :
 			self.mouse_captured = False
-			self.set_exclusive_keyboard(False)
+			self.set_exclusive_mouse(False)
 
 class Game:
 	def __init__(self):
