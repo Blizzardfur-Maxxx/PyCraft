@@ -19,8 +19,6 @@ class Subchunk:
 			self.parent.position[1] + self.local_position[1],
 			self.parent.position[2] + self.local_position[2])
 
-		# mesh variables
-
 		self.mesh_vertex_positions = []
 		self.mesh_tex_coords = []
 		self.mesh_shading_values = []
@@ -72,10 +70,6 @@ class Subchunk:
 							self.position[0] + local_x,
 							self.position[1] + local_y,
 							self.position[2] + local_z)
-						
-						# if block is cube, we want it to check neighbouring blocks so that we don't uselessly render faces
-						# if block isn't a cube, we just want to render all faces, regardless of neighbouring blocks
-						# since the vast majority of blocks are probably anyway going to be cubes, this won't impact performance all that much; the amount of useless faces drawn is going to be minimal
 
 						if block_type.is_cube:
 							if not self.world.is_opaque_block((x + 1, y, z)): add_face(0)
