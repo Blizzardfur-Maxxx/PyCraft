@@ -1,4 +1,3 @@
-
 import math
 import ctypes
 import pyglet
@@ -14,6 +13,8 @@ import camera
 
 import world
 
+import hit
+
 class Window(pyglet.window.Window):
 	def __init__(self, **args):
 		super().__init__(**args)
@@ -28,15 +29,16 @@ class Window(pyglet.window.Window):
 		self.mouse_captured = False
 
 		self.camera = camera.Camera(self.shader, self.width, self.height)
+
+		self.holding = 7
 	
 	def update(self, delta_time):
-		print(f"FPS {1 / delta_time}")
+		print(f"FPS: {1.0 / delta_time}")
 
 		if not self.mouse_captured:
 			self.camera.input = [0, 0, 0]
 
 		self.camera.update_camera(delta_time)
-		self.world.set_block(self.camera.position, 7)
 	
 	def on_draw(self):
 		self.camera.update_matrices()
@@ -61,9 +63,25 @@ class Window(pyglet.window.Window):
 		self.camera.width = width
 		self.camera.height = height
 	
+
 	def on_mouse_press(self, x, y, button, modifiers):
-		self.mouse_captured = not self.mouse_captured
-		self.set_exclusive_mouse(self.mouse_captured)
+		if not self.mouse_captured:
+			self.mouse_captured = True
+			self.set_exclusive_mouse(True)
+
+			return
+
+		def hit_callback(current_block, next_block):
+			if button == pyglet.window.mouse.RIGHT: self.world.set_block(current_block, self.holding)
+			elif button == pyglet.window.mouse.LEFT: self.world.set_block(next_block, 0)
+			elif button == pyglet.window.mouse.MIDDLE: self.holding = self.world.get_block_number(next_block)
+		
+		hit_ray = hit.Hit_ray(self.world, self.camera.rotation, self.camera.position)
+
+		while hit_ray.distance < hit.HIT_RANGE:
+			if hit_ray.step(hit_callback):
+				break
+
 	
 	def on_mouse_motion(self, x, y, delta_x, delta_y):
 		if self.mouse_captured:
@@ -73,7 +91,10 @@ class Window(pyglet.window.Window):
 			self.camera.rotation[1] -= delta_y * sensitivity
 
 			self.camera.rotation[1] = max(-math.tau / 4, min(math.tau / 4, self.camera.rotation[1]))
-	
+
+	def on_mouse_drag(self, x, y, delta_x, delta_y, buttons, modifiers):
+		self.on_mouse_motion(x, y, delta_x, delta_y)
+
 	def on_key_press(self, key, modifiers):
 		if not self.mouse_captured:
 			return
@@ -97,6 +118,10 @@ class Window(pyglet.window.Window):
 
 		elif key == pyglet.window.key.SPACE : self.camera.input[1] -= 1
 		elif key == pyglet.window.key.LSHIFT: self.camera.input[1] += 1
+
+		elif key == pyglet.window.key.ESCAPE :
+			self.mouse_captured = False
+			self.set_exclusive_keyboard(False)
 
 class Game:
 	def __init__(self):
