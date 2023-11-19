@@ -6,8 +6,6 @@ class Shader_error(Exception):
 		self.message = message
 
 def create_shader(target, source_path):
-	# read shader source
-
 	source_file = open(source_path, "rb")
 	source = source_file.read()
 	source_file.close()
@@ -19,12 +17,8 @@ def create_shader(target, source_path):
 		ctypes.pointer(ctypes.pointer(source_buffer)),
 		ctypes.POINTER(ctypes.POINTER(ctypes.c_char)))
 	
-	# compile shader
-
 	gl.glShaderSource(target, 1, buffer_pointer, ctypes.byref(source_length))
 	gl.glCompileShader(target)
-
-	# handle potential errors
 
 	log_length = gl.GLint(0)
 	gl.glGetShaderiv(target, gl.GL_INFO_LOG_LENGTH, ctypes.byref(log_length))
@@ -39,19 +33,13 @@ class Shader:
 	def __init__(self, vert_path, frag_path):
 		self.program = gl.glCreateProgram()
 
-		# create vertex shader
-
 		self.vert_shader = gl.glCreateShader(gl.GL_VERTEX_SHADER)
 		create_shader(self.vert_shader, vert_path)
 		gl.glAttachShader(self.program, self.vert_shader)
 
-		# create fragment shader
-
 		self.frag_shader = gl.glCreateShader(gl.GL_FRAGMENT_SHADER)
 		create_shader(self.frag_shader, frag_path)
 		gl.glAttachShader(self.program, self.frag_shader)
-
-		# link program and clean up
 
 		gl.glLinkProgram(self.program)
 

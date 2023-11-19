@@ -18,27 +18,19 @@ class Window(pyglet.window.Window):
 	def __init__(self, **args):
 		super().__init__(**args)
 
-		# create world
-
 		self.world = world.World()
 		
-		# create shader
-
 		self.shader = shader.Shader("vert.glsl", "frag.glsl")
 		self.shader_sampler_location = self.shader.find_uniform(b"texture_array_sampler")
 		self.shader.use()
 
-		# pyglet stuff
-
-		pyglet.clock.schedule_interval(self.update, 1.0 / 10000) # set the update interval as small as possible
+		pyglet.clock.schedule_interval(self.update, 1.0 / 10000)
 		self.mouse_captured = False
-
-		# camera stuff
 
 		self.camera = camera.Camera(self.shader, self.width, self.height)
 	
 	def update(self, delta_time):
-		print(f"FPS {1 / delta_time}") # print out the current FPS
+		print(f"FPS {1 / delta_time}")
 
 		if not self.mouse_captured:
 			self.camera.input = [0, 0, 0]
@@ -48,13 +40,9 @@ class Window(pyglet.window.Window):
 	def on_draw(self):
 		self.camera.update_matrices()
 
-		# bind textures
-
 		gl.glActiveTexture(gl.GL_TEXTURE0)
 		gl.glBindTexture(gl.GL_TEXTURE_2D_ARRAY, self.world.texture_manager.texture_array)
 		gl.glUniform1i(self.shader_sampler_location, 0)
-
-		# draw stuff
 
 		gl.glEnable(gl.GL_DEPTH_TEST)
 		gl.glEnable(gl.GL_CULL_FACE)
@@ -63,10 +51,8 @@ class Window(pyglet.window.Window):
 		self.clear()
 		self.world.draw()
 
-		gl.glFinish() # there seems to be a bit of a bug in Pyglet which makes this call necessary
+		gl.glFinish()
 	
-	# input functions
-
 	def on_resize(self, width, height):
 		print(f"Resize {width} * {height}")
 		gl.glViewport(0, 0, width, height)
@@ -83,7 +69,7 @@ class Window(pyglet.window.Window):
 			sensitivity = 0.004
 
 			self.camera.rotation[0] -= delta_x * sensitivity
-			self.camera.rotation[1] += delta_y * sensitivity
+			self.camera.rotation[1] -= delta_y * sensitivity
 
 			self.camera.rotation[1] = max(-math.tau / 4, min(math.tau / 4, self.camera.rotation[1]))
 	
@@ -113,8 +99,8 @@ class Window(pyglet.window.Window):
 
 class Game:
 	def __init__(self):
-		self.config = gl.Config(double_buffer = True, major_version = 3, minor_version = 3, depth_size = 16) # add depth_size = 16 because pyglet makes a 24 bit depth buffer by default, which isn't supported on some hardware
-		self.window = Window(config = self.config, width = 800, height = 600, caption = "Minecraft clone", resizable = True, vsync = False)
+		self.config = gl.Config(double_buffer = True, major_version = 3, minor_version = 3, depth_size = 16)
+		self.window = Window(config = self.config, width = 800, height = 600, caption = "PyCraft", resizable = True, vsync = False)
 	
 	def run(self):
 		pyglet.app.run()

@@ -1,4 +1,4 @@
-import numbers_rend # import numbers.py file
+import numbers_rend
 
 class Block_type:
 	def __init__(self, texture_manager, name = "unknown", block_face_textures = {"all": "cobblestone"}):
@@ -6,18 +6,21 @@ class Block_type:
 
 		self.vertex_positions = numbers_rend.vertex_positions
 		self.tex_coords = numbers_rend.tex_coords.copy()
-		self.indices = numbers_rend.indices
 		self.shading_values = numbers_rend.shading_values
 
 		def set_block_face(face, texture):
+			self.tex_coords[face] = self.tex_coords[face].copy()
+
 			for vertex in range(4):
-				self.tex_coords[face * 12 + vertex * 3 + 2] = texture
+				self.tex_coords[face][vertex * 3 + 2] = texture
 
 		for face in block_face_textures:
 			texture = block_face_textures[face]
 			texture_manager.add_texture(texture)
+
 			texture_index = texture_manager.textures.index(texture)
-			if face == "all": 
+
+			if face == "all":
 				set_block_face(0, texture_index)
 				set_block_face(1, texture_index)
 				set_block_face(2, texture_index)
@@ -25,7 +28,7 @@ class Block_type:
 				set_block_face(4, texture_index)
 				set_block_face(5, texture_index)
 			
-			elif face == "sides": 
+			elif face == "sides":
 				set_block_face(0, texture_index)
 				set_block_face(1, texture_index)
 				set_block_face(4, texture_index)
