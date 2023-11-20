@@ -1,16 +1,13 @@
 import math
-import random
-
-import chunks
-
-import block_type
-import texture_manager
-
-
-import models
-import save
 import os
 import zipfile
+
+import chunks
+import block_type
+import texture_manager
+import models
+import save
+
 
 class World:
 	def __init__(self):

@@ -1,6 +1,5 @@
 import ctypes
 import pyglet
-
 import pyglet.gl as gl
 
 class Texture_manager:

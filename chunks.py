@@ -1,6 +1,5 @@
 import ctypes
 import math
-
 import pyglet.gl as gl
 
 import subchunk 

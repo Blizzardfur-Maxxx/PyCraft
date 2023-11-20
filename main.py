@@ -1,8 +1,5 @@
 import math
-import ctypes
 import pyglet
-import time
-
 import random
 
 pyglet.options["shadow_window"] = False
@@ -10,12 +7,9 @@ pyglet.options["debug_gl"] = False
 
 import pyglet.gl as gl
 
-import matrix
 import shader
 import camera
-
 import world
-
 import hit
 
 class Window(pyglet.window.Window):
@@ -56,7 +50,6 @@ class Window(pyglet.window.Window):
 		gl.glClearColor(0.0, 0.0, 0.7, 0.5)
 		self.clear()
 		self.world.draw()
-
 		gl.glFinish()
 	
 	def on_resize(self, width, height):
