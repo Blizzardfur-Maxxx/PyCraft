@@ -42,10 +42,7 @@ class Window(pyglet.window.Window):
 			self.camera.input = [0, 0, 0]
 
 		self.camera.update_camera(delta_time)
-
-	def on_close(self):
-		self.world.save.save()
-	
+		
 	def on_draw(self):
 		self.camera.update_matrices()
 
