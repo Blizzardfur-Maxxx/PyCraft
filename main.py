@@ -34,10 +34,6 @@ class Window(pyglet.window.Window):
 		self.camera = camera.Camera(self.shader, self.width, self.height)
 
 		self.holding = 1
-
-		while True:
-			self.world.save.save()
-			time.sleep(10)
 	
 	def update(self, delta_time):
 		##print(f"FPS: {1.0 / delta_time}")
@@ -72,7 +68,6 @@ class Window(pyglet.window.Window):
 
 		self.camera.width = width
 		self.camera.height = height
-	
 
 	def on_mouse_press(self, x, y, button, modifiers):
 		if not self.mouse_captured:
@@ -92,7 +87,6 @@ class Window(pyglet.window.Window):
 			if hit_ray.step(hit_callback):
 				break
 
-	
 	def on_mouse_motion(self, x, y, delta_x, delta_y):
 		if self.mouse_captured:
 			sensitivity = 0.004

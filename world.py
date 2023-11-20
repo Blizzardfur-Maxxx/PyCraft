@@ -24,19 +24,15 @@ class World:
 		blocks_data_file.close()
 
 		for block in blocks_data:
-			if block[0] in ['\n', '#']: # skip if empty line or comment
+			if block[0] in ['\n', '#']:
 				continue
 			
 			number, props = block.split(':', 1)
 			number = int(number)
 
-			# default block
-
 			name = "Unknown"
 			model = models.cube
 			texture = {"all": "unknown"}
-
-			# read properties
 
 			for prop in props.split(','):
 				prop = prop.strip()
@@ -59,8 +55,6 @@ class World:
 				elif prop[0] == "model":
 					model = eval(prop[1])
 			
-			# add block type
-
 			_block_type = block_type.Block_type(self.texture_manager, name, texture, model)
 
 			if number < len(self.block_types):
@@ -68,7 +62,6 @@ class World:
 			
 			else:
 				self.block_types.append(_block_type)
-
 
 		self.texture_manager.generate_mipmaps()
 
@@ -82,12 +75,10 @@ class World:
 			self.save = save.Save(self)
 			self.chunks = {}
 			self.save.load()
-
-		
+	
 		for chunk_position in self.chunks:
 			self.chunks[chunk_position].update_subchunk_meshes()
 			self.chunks[chunk_position].update_mesh()
-
 
 		for chunk_position in self.chunks:
 			self.chunks[chunk_position].update_subchunk_meshes()
