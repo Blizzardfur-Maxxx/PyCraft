@@ -8,8 +8,8 @@ import texture_manager
 
 
 import models
-import models
-
+import save
+import os
 
 class World:
 	def __init__(self):
@@ -68,29 +68,38 @@ class World:
 			else:
 				self.block_types.append(_block_type)
 
+
 		self.texture_manager.generate_mipmaps()
 
-		# load the world
+		if os.path.exists("save") and os.path.isdir("save"):
+			self.save = save.Save(self)
+			self.chunks = {}
+			self.save.load()
+		else:
+			os.makedirs("save")
+			for x in range(8):
+				for z in range(8):
+					chunk_position = (x - 1, -1, z - 1)
+					current_chunk = chunks.Chunk(self, chunk_position)
 
-		self.chunks = {}
+					for i in range(chunks.CHUNK_WIDTH):
+						for j in range(chunks.CHUNK_HEIGHT):
+							for k in range(chunks.CHUNK_LENGTH):
+								if j >= 80: current_chunk.blocks[i][j][k] = 0
+								elif j == 79: current_chunk.blocks[i][j][k] = 2
+								elif j <= 78 and j > 74: current_chunk.blocks[i][j][k] = 3
+								else: current_chunk.blocks[i][j][k] = 1
 
-		for x in range(8):
-			for z in range(8):
-				chunk_position = (x - 1, -1, z - 1)
-				current_chunk = chunks.Chunk(self, chunk_position)
-
-				for i in range(chunks.CHUNK_WIDTH):
-					for j in range(chunks.CHUNK_HEIGHT):
-						for k in range(chunks.CHUNK_LENGTH):
-							if j == 15: current_chunk.blocks[i][j][k] = random.choices([0, 9, 10], [20, 2, 1])[0]
-							elif j == 14: current_chunk.blocks[i][j][k] = 2
-							elif j > 10: current_chunk.blocks[i][j][k] = 4
-							else: current_chunk.blocks[i][j][k] = 5
-
-				self.chunks[chunk_position] = current_chunk
+					self.chunks[chunk_position] = current_chunk
 
 				
-				self.chunks[chunk_position] = current_chunk
+					self.chunks[chunk_position] = current_chunk
+					
+		
+		for chunk_position in self.chunks:
+			self.chunks[chunk_position].update_subchunk_meshes()
+			self.chunks[chunk_position].update_mesh()
+
 
 		for chunk_position in self.chunks:
 			self.chunks[chunk_position].update_subchunk_meshes()
@@ -149,6 +158,7 @@ class World:
 		lx, ly, lz = self.get_local_position(position)
 
 		self.chunks[chunk_position].blocks[lx][ly][lz] = number
+		self.chunks[chunk_position].modified = True
 		self.chunks[chunk_position].update_at_position((x, y, z))
 		self.chunks[chunk_position].update_mesh()
 

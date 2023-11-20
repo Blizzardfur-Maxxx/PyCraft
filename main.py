@@ -2,6 +2,8 @@ import math
 import ctypes
 import pyglet
 
+import random
+
 pyglet.options["shadow_window"] = False
 pyglet.options["debug_gl"] = False
 
@@ -33,7 +35,7 @@ class Window(pyglet.window.Window):
 		self.holding = 1
 	
 	def update(self, delta_time):
-		print(f"FPS: {1.0 / delta_time}")
+		##print(f"FPS: {1.0 / delta_time}")
 
 		if not self.mouse_captured:
 			self.camera.input = [0, 0, 0]
@@ -107,6 +109,9 @@ class Window(pyglet.window.Window):
 		elif key == pyglet.window.key.SPACE : self.camera.input[1] += 1
 		elif key == pyglet.window.key.LSHIFT: self.camera.input[1] -= 1
 
+		elif key == pyglet.window.key.G:
+			self.holding = random.randint(1, len(self.world.block_types) - 1)
+
 	def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
 		if scroll_y > 0:
 			self.holding += 1
@@ -128,6 +133,9 @@ class Window(pyglet.window.Window):
 		elif key == pyglet.window.key.ESCAPE :
 			self.mouse_captured = False
 			self.set_exclusive_mouse(False)
+
+		elif key == pyglet.window.key.O:
+			self.world.save.save()
 
 class Game:
 	def __init__(self):

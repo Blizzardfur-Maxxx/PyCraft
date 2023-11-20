@@ -15,7 +15,7 @@ class Camera:
 
         self.input = [0, 0, 0]
 
-        self.position = [0, 0, -3]
+        self.position = [0, 80, -3]
         self.rotation = [-math.tau / 4,0]
 
     def update_camera(self, delta_time):
