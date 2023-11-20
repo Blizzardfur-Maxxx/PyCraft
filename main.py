@@ -34,6 +34,10 @@ class Window(pyglet.window.Window):
 		self.camera = camera.Camera(self.shader, self.width, self.height)
 
 		self.holding = 1
+
+		while True:
+			self.world.save.save()
+			time.sleep(10)
 	
 	def update(self, delta_time):
 		##print(f"FPS: {1.0 / delta_time}")
@@ -42,10 +46,6 @@ class Window(pyglet.window.Window):
 			self.camera.input = [0, 0, 0]
 
 		self.camera.update_camera(delta_time)
-
-		while True:
-			self.world.save.save()
-			time.sleep(10)
 
 	def on_close(self):
 		self.world.save.save()
