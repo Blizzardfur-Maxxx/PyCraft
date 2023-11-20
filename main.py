@@ -1,6 +1,7 @@
 import math
 import ctypes
 import pyglet
+import time
 
 import random
 
@@ -41,6 +42,13 @@ class Window(pyglet.window.Window):
 			self.camera.input = [0, 0, 0]
 
 		self.camera.update_camera(delta_time)
+
+		while True:
+			self.world.save.save()
+			time.sleep(10)
+
+	def on_close(self):
+		self.world.save.save()
 	
 	def on_draw(self):
 		self.camera.update_matrices()

@@ -10,6 +10,7 @@ import texture_manager
 import models
 import save
 import os
+import zipfile
 
 class World:
 	def __init__(self):
@@ -76,25 +77,12 @@ class World:
 			self.chunks = {}
 			self.save.load()
 		else:
-			os.makedirs("save")
-			for x in range(8):
-				for z in range(8):
-					chunk_position = (x - 1, -1, z - 1)
-					current_chunk = chunks.Chunk(self, chunk_position)
+			with zipfile.ZipFile("world.zip", 'r') as zip_ref:
+				zip_ref.extractall()
+			self.save = save.Save(self)
+			self.chunks = {}
+			self.save.load()
 
-					for i in range(chunks.CHUNK_WIDTH):
-						for j in range(chunks.CHUNK_HEIGHT):
-							for k in range(chunks.CHUNK_LENGTH):
-								if j >= 80: current_chunk.blocks[i][j][k] = 0
-								elif j == 79: current_chunk.blocks[i][j][k] = 2
-								elif j <= 78 and j > 74: current_chunk.blocks[i][j][k] = 3
-								else: current_chunk.blocks[i][j][k] = 1
-
-					self.chunks[chunk_position] = current_chunk
-
-				
-					self.chunks[chunk_position] = current_chunk
-					
 		
 		for chunk_position in self.chunks:
 			self.chunks[chunk_position].update_subchunk_meshes()
